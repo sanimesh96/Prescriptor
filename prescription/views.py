@@ -1,5 +1,8 @@
 from django.shortcuts import render, redirect
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from .models import Prescription
+import json
 
 # Create your views here.
 def homepage(request):
@@ -63,3 +66,14 @@ def annotatePrescription(request, prescription_id):
         return render(request, 'annotator/via.html', context=context)
     else:
         return redirect("login")
+
+@csrf_exempt
+def addAnnotation(request):
+    print(request.POST)
+    annotations = request.POST['annotation']
+    annotations = json.loads(annotations)
+    print(annotations)
+    json_object = json.dumps(annotations, indent=4)
+    with open("sample.json", "w") as outfile:
+        outfile.write(json_object)
+    return JsonResponse({"abc":"dad"})

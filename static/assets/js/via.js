@@ -546,7 +546,19 @@ function download_all_region_data(type, file_extension) {
   pack_via_metadata(type).then( function(data) {
     var blob_attr = {type: 'text/'+file_extension+';charset=utf-8'};
     var all_region_data_blob = new Blob(data, blob_attr);
-
+    console.log(typeof(data))
+    console.log(data, "===========================")
+    $.ajax({
+      type: "POST",
+      url: '/addAnnotation/',
+      data: {
+        'annotation': data[0],
+      },
+      success: function(response){
+        console.log(response)
+      }
+    });
+    console.log("asila")
     var filename = 'via_export';
     if(typeof(_via_settings) !== 'undefined' &&
        _via_settings.hasOwnProperty('project') &&
@@ -556,7 +568,8 @@ function download_all_region_data(type, file_extension) {
     if ( file_extension !== 'csv' || file_extension !== 'json' ) {
       filename += '_' + type + '.' + file_extension;
     }
-    save_data_to_local_file(all_region_data_blob, filename);
+    console.log(all_region_data_blob)
+    //save_data_to_local_file(all_region_data_blob, filename);
   }.bind(this), function(err) {
     show_message('Failed to download data: [' + err + ']');
   }.bind(this));
