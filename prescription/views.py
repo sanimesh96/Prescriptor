@@ -9,7 +9,7 @@ def homepage(request):
     if request.user.is_authenticated:
         return render(request, 'pages/homepage.html')
     else:
-        return redirect('/login')
+        return redirect('login')
 
 
 def uploadPrescription(request):
@@ -71,8 +71,12 @@ def annotatePrescription(request, prescription_id):
 def addAnnotation(request):
     print(request.POST)
     annotations = request.POST['annotation']
-    annotations = json.loads(annotations)
     print(annotations)
+    print(type(annotations))
+    text_file = open("data.txt", "w")
+    text_file.write(annotations)
+    text_file.close()
+    annotations = json.loads(annotations)
     json_object = json.dumps(annotations, indent=4)
     with open("sample.json", "w") as outfile:
         outfile.write(json_object)
