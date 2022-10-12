@@ -546,11 +546,9 @@ function download_all_region_data(type, file_extension) {
   pack_via_metadata(type).then( function(data) {
     var blob_attr = {type: 'text/'+file_extension+';charset=utf-8'};
     var all_region_data_blob = new Blob(data, blob_attr);
-    console.log(typeof(data))
-    console.log(data, "===========================")
     $.ajax({
       type: "POST",
-      url: '/addAnnotation/',
+      url: '/addAnnotation/{{prescription.id}}/',
       data: {
         'annotation': data[0],
       },
@@ -558,7 +556,6 @@ function download_all_region_data(type, file_extension) {
         console.log(response)
       }
     });
-    console.log("asila")
     var filename = 'via_export';
     if(typeof(_via_settings) !== 'undefined' &&
        _via_settings.hasOwnProperty('project') &&

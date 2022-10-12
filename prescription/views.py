@@ -1,6 +1,5 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 from .models import Prescription
 import json
 
@@ -67,17 +66,11 @@ def annotatePrescription(request, prescription_id):
     else:
         return redirect("login")
 
-@csrf_exempt
-def addAnnotation(request):
+def addAnnotation(request, prescription_id):
+    prescription = Prescription.objects.get(id=prescription_id)
     print(request.POST)
     annotations = request.POST['annotation']
-    print(annotations)
-    print(type(annotations))
-    text_file = open("data.txt", "w")
-    text_file.write(annotations)
-    text_file.close()
     annotations = json.loads(annotations)
-    json_object = json.dumps(annotations, indent=4)
-    with open("sample.json", "w") as outfile:
-        outfile.write(json_object)
+    prescription.annotation = annotations
+    prescription.save()
     return JsonResponse({"abc":"dad"})

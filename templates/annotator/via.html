@@ -7,7 +7,6 @@
     <title>Prescription Annotator</title>
     <meta name="author" content="Abhishek Dutta">
     <meta name="description" content="VIA is a standalone image annotator application packaged as a single HTML file (< 400 KB) that runs on most modern web browsers.">
-
     <script type="text/javascript">
       (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
         (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -189,8 +188,8 @@
             </ul>
           </li> -->
 
-          <li>Annotation
-            <ul>
+          <li onclick="custom_download_all_region_data('json')">Save Annotation
+            <!-- <ul>
               <li onclick="download_all_region_data('csv')" title="Export annotations to a CSV file">Export Annotations (as csv)</li>
               <li onclick="download_all_region_data('json')" title="Export annotaitons to a JSON file">Export Annotations (as json)</li>
               <li onclick="download_all_region_data('coco', 'json')" title="Export annotaitons to COCO (http://cocodataset.org) format">Export Annotations (COCO format)</li>
@@ -202,7 +201,7 @@
               <li class="submenu_divider"></li>
               <li onclick="show_annotation_data()" title="Show a preview of annotations (opens in a new browser windows)">Preview Annotations</li>
               <li onclick="download_as_image()" title="Download an image containing the annotations">Download as Image</li>
-            </ul>
+            </ul> -->
           </li>
 
           <!-- <li>View
@@ -736,6 +735,42 @@ POSSIBILITY OF SUCH DAMAGE.
     <!-- DEMO SCRIPT AUTOMATICALLY INSERTED BY VIA PACKER SCRIPT -->
     <script src="{% static 'assets/js/via.js'%}"></script>
     <script language="javascript">
+      function custom_download_all_region_data(type, file_extension) {
+        if ( typeof(file_extension) === 'undefined' ) {
+          file_extension = type;
+        }
+        // Javascript strings (DOMString) is automatically converted to utf-8
+        // see: https://developer.mozilla.org/en-US/docs/Web/API/Blob/Blob
+        pack_via_metadata(type).then( function(data) {
+          var blob_attr = {type: 'text/'+file_extension+';charset=utf-8'};
+          var all_region_data_blob = new Blob(data, blob_attr);
+          console.log("custom function called")
+          $.ajax({
+            type: "POST",
+            url: '/addAnnotation/{{prescription.id}}/',
+            data: {
+              'csrfmiddlewaretoken': '{{csrf_token}}',
+              'annotation': data[0],
+            },
+            success: function(response){
+              console.log(response)
+              window.location.href = '/'
+            }
+          });
+          var filename = 'via_export';
+          if(typeof(_via_settings) !== 'undefined' &&
+            _via_settings.hasOwnProperty('project') &&
+            _via_settings['project']['name'] !== '') {
+            filename = _via_settings['project']['name'];
+          }
+          if ( file_extension !== 'csv' || file_extension !== 'json' ) {
+            filename += '_' + type + '.' + file_extension;
+          }
+          //save_data_to_local_file(all_region_data_blob, filename);
+        }.bind(this), function(err) {
+          show_message('Failed to download data: [' + err + ']');
+        }.bind(this));
+      }
         $(document).ready(function (){
             var img_id = project_file_add_url("http://localhost:8000{{prescription.image.url}}/");
             var img_index = _via_image_id_list.indexOf(img_id);
@@ -745,7 +780,9 @@ POSSIBILITY OF SUCH DAMAGE.
                 _via_show_img(0)
             }, 3000)
             setTimeout(function(){
-              //import_annotations_from_json(JSON.stringify())
+              var annot = "{{prescription.annotation|safe}}"
+              annot = annot.replace(/'/g, '"')
+              import_annotations_from_json(annot)
             }, 5000)
         })
     </script>

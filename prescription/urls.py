@@ -9,5 +9,5 @@ urlpatterns = [
     path('dashboard/',Dashboard, name = 'Dashboard'),
     path('singleViewPrescription/<int:prescription_id>/', singleView, name='singleViewPres'),
     path('annotatePrescription/<int:prescription_id>/', annotatePrescription, name='annotatePrescription'),
-    path('addAnnotation/', addAnnotation),
+    path('addAnnotation/<int:prescription_id>/', addAnnotation),
 ]
