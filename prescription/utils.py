@@ -39,6 +39,6 @@ def convert(aws_response, image_path, image_name):
             formatted_json[url]["regions"].append(new_dict)
     return formatted_json
 
-def viewAnnotation(annotation):
-    print(annotation)
+def viewAnnotation(annotation, image_path):
+    print(annotation, image_path)
     return annotation
