@@ -52,9 +52,10 @@ def visualizeAnnotation(request, prescription_id):
         annotation = None
         prescription = Prescription.objects.get(id=prescription_id)
         annotation = prescription.annotation
+        annotated_image, digitized_image = viewAnnotation(annotation, image_path = prescription.image)
         context = {
             'prescription':prescription,
-            'annotated_image_uri': viewAnnotation(annotation, image_path = prescription.image.url)
+            'annotated_image_uri': annotated_image
         }
         return render(request, 'pages/visualise.html', context=context)
     else:

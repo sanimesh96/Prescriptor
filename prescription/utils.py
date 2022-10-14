@@ -1,6 +1,7 @@
 import cv2
 from PIL import Image
 import base64
+import numpy as np
 from io import BytesIO
 
 def remove_single_quote(word):
@@ -45,20 +46,41 @@ def convert(aws_response, image_path, image_name):
 def viewAnnotation(annotation, image_path):
     print(annotation)
     img = cv2.imread('.'+image_path)
+    h, w, _ = img.shape
     print(image_path)
+    digitized_img = np.zeros([h, w, 3], dtype=np.uint8)
+    digitized_img.fill(255)
+
     for region in annotation[image_path+'/-1']["regions"]:
         start_x_coordinate = region["shape_attributes"]["x"]
         start_y_coordinate = region["shape_attributes"]["y"]
         height_of_box = region["shape_attributes"]["height"]
         width_of_box = region["shape_attributes"]["width"]
+        text = region["region_attributes"]["text"]
         end_x_coordinate = start_x_coordinate + width_of_box
         end_y_coordinate = start_y_coordinate + height_of_box
+
+        fontScale = height_of_box / width_of_box
+        if fontScale > 0.5:
+            fontScale = 1.44
+        else:
+            fontScale = 0.72
+
         cv2.rectangle(img, 
         (start_x_coordinate, start_y_coordinate),
         (end_x_coordinate, end_y_coordinate), 
         (0, 255, 255), 
         3)
-    return numpyImg_to_base64img(img)
+
+        cv2.putText(digitized_img,
+        text,
+        (start_x_coordinate, start_y_coordinate + (height_of_box // 2)),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        fontScale,
+        (0, 0, 0),
+        2,
+        cv2.LINE_AA)
+    return numpyImg_to_base64img(img), numpyImg_to_base64img(digitized_img)
 
 def to_data_uri(pil_img):
     data = BytesIO()
