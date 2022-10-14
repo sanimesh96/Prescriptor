@@ -13,6 +13,7 @@
         <h4 class="page-title">
             Uploaded By: {{prescription.uploaded_by.username}}<br>
             Uploaded On: {{prescription.uploaded_on}}
+            
         </h4>
         <div class="row">
             <div class="col-md-6">
@@ -22,15 +23,12 @@
                     </div>
                 </div>
             </div>
-
             <div class="col-md-6">
                 <div class="d-flex justify-content-between">
                     <a href="/annotatePrescription/{{prescription.id}}/">
                         <button class="btn btn-success">EDIT</button>
                     </a>
-                    <a href="/predictPrescription/{{prescription.id}}/">
-                        <button class="btn btn-success">PREDICT</button>
-                    </a>
+                    
                     <button class="btn btn-danger">DELETE</button>
                 </div>
             </div>

@@ -30,7 +30,8 @@ def uploadPrescription(request):
             image = request.FILES['prescription_image']
             obj = Prescription(uploaded_by=request.user, image=image)
             obj.save()
-            return redirect('prescriptions')
+            predictPrescription(request, obj.id)
+            return redirect('singleViewPres', prescription_id=obj.id)
     else:
         return redirect('login')
 
@@ -61,8 +62,13 @@ def Dashboard(request):
 
 def singleView(request, prescription_id):
     if request.user.is_authenticated:
+        if Prescription.objects.get(id=prescription_id).medication:
+            p=True
+        else:
+          p=False
         context = {
             'prescription': Prescription.objects.get(id=prescription_id),
+            'predicted':p,
         }
         return render(request, 'pages/singleView.html', context=context)
     else:
@@ -76,6 +82,18 @@ def annotatePrescription(request, prescription_id):
         return render(request, 'annotator/via.html', context=context)
     else:
         return redirect("login")
+
+def medication(result):
+    res = ''
+    for word in result:
+        res += word[1]+ ' '
+    print(res)
+    comprehendmedical = boto3.client('comprehendmedical', aws_access_key_id=ACCESS_KEY_ID,
+                        aws_secret_access_key = ACCESS_SECRET_KEY, region_name='us-west-2')
+    result = comprehendmedical.detect_entities(Text= res)
+    entities = result['Entities']
+    for entity in entities:
+        print(entity)
 
 def predictPrescription(request, prescription_id):
     if request.user.is_authenticated:
@@ -102,7 +120,6 @@ def predictPrescription(request, prescription_id):
         prescription = Prescription.objects.get(id=prescription_id)
         prescription.annotation= preds
         prescription.save()
-        return redirect('annotatePrescription', prescription_id=prescription_id)
     else:
         return redirect("login")
 
