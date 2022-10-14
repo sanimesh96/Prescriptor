@@ -772,7 +772,7 @@ POSSIBILITY OF SUCH DAMAGE.
         }.bind(this));
       }
         $(document).ready(function (){
-            var img_id = project_file_add_url("http://localhost:8000{{prescription.image.url}}/");
+            var img_id = project_file_add_url("{{prescription.image.url}}/");
             var img_index = _via_image_id_list.indexOf(img_id);
             update_img_fn_list();
             //user_input_default_cancel_handler();
