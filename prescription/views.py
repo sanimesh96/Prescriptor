@@ -82,7 +82,6 @@ def addMedication(request, prescription_id):
         
         for r in annotation[url]['regions']:
             res+=" "+r['region_attributes']['text']
-        print(res)
         result = comprehendmedical.detect_entities(Text= res)
         entities = result['Entities']
        
@@ -91,8 +90,6 @@ def addMedication(request, prescription_id):
         Medication = {}
         med=[]
         c = []
-        for e in entities:
-            print("entities",e)
         for key in entities:
             
             if key['Category'] == 'PROTECTED_HEALTH_INFORMATION':
@@ -117,7 +114,8 @@ def addMedication(request, prescription_id):
                 if key['Text'] not in Medication:
                     Medication[key['Text']] = [dosage,frequency]
 
-       
+        prescription.medication = Medication
+        prescription.save()
         context={
             'med':c,
         }
@@ -152,13 +150,10 @@ def medication(result):
     res = ''
     for word in result:
         res += word[1]+ ' '
-    print(res)
     comprehendmedical = boto3.client('comprehendmedical', aws_access_key_id=ACCESS_KEY_ID,
                         aws_secret_access_key = ACCESS_SECRET_KEY, region_name='us-west-2')
     result = comprehendmedical.detect_entities(Text= res)
     entities = result['Entities']
-    for entity in entities:
-        print(entity)
 
 def predictPrescription(request, prescription_id):
     if request.user.is_authenticated:
