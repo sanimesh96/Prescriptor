@@ -40,5 +40,19 @@ def convert(aws_response, image_path, image_name):
     return formatted_json
 
 def viewAnnotation(annotation, image_path):
-    print(annotation, image_path)
-    return annotation
+    print(annotation)
+    img = cv2.imread('.'+image_path)
+    print(image_path)
+    for region in annotation[image_path+'/-1']["regions"]:
+        start_x_coordinate = region["shape_attributes"]["x"]
+        start_y_coordinate = region["shape_attributes"]["y"]
+        height_of_box = region["shape_attributes"]["height"]
+        width_of_box = region["shape_attributes"]["width"]
+        end_x_coordinate = start_x_coordinate + width_of_box
+        end_y_coordinate = start_y_coordinate + height_of_box
+        cv2.rectangle(img, 
+        (start_x_coordinate, start_y_coordinate),
+        (end_x_coordinate, end_y_coordinate), 
+        (0, 255, 255), 
+        3)
+    return img
