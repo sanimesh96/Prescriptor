@@ -1,4 +1,7 @@
 import cv2
+from PIL import Image
+import base64
+from io import BytesIO
 
 def remove_single_quote(word):
     s = ''
@@ -55,4 +58,14 @@ def viewAnnotation(annotation, image_path):
         (end_x_coordinate, end_y_coordinate), 
         (0, 255, 255), 
         3)
-    return img
+    return numpyImg_to_base64img(img)
+
+def to_data_uri(pil_img):
+    data = BytesIO()
+    pil_img.save(data, "JPEG") # pick your format
+    data64 = base64.b64encode(data.getvalue())
+    return u'data:img/jpeg;base64,'+data64.decode('utf-8') 
+
+def numpyImg_to_base64img(np_img):
+    pil_image = Image.fromarray(np_img).convert('RGB')
+    return to_data_uri(pil_image)
