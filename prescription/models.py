@@ -7,3 +7,4 @@ class Prescription(models.Model):
     uploaded_on = models.DateTimeField(auto_now_add=True)
     image = models.ImageField(upload_to = 'uploadedPrescriptions/')
     annotation = models.JSONField(null=True, blank=True)
+    medication = models.JSONField(null=True,blank=True)
