@@ -14,7 +14,8 @@ s3 = boto3.client('s3',aws_access_key_id = ACCESS_KEY_ID,aws_secret_access_key =
 s3 = boto3.client('s3',aws_access_key_id=ACCESS_KEY_ID,aws_secret_access_key= ACCESS_SECRET_KEY,)
 textract = boto3.client('textract',aws_access_key_id=ACCESS_KEY_ID,aws_secret_access_key = ACCESS_SECRET_KEY, region_name='us-west-2')
 BUCKET_NAME = config('BUCKET_NAME')
-
+comprehendmedical = boto3.client('comprehendmedical', aws_access_key_id=ACCESS_KEY_ID,
+                        aws_secret_access_key = ACCESS_SECRET_KEY, region_name='us-west-2')
 # Create your views here.
 def homepage(request):
     if request.user.is_authenticated:
@@ -72,7 +73,57 @@ def Dashboard(request):
         return render(request, 'pages/dashboard.html')
     else:
         return redirect('login')
+def addMedication(request, prescription_id):
+    if request.user.is_authenticated:
+        prescription = Prescription.objects.get(id=prescription_id)
+        annotation = Prescription.objects.get(id=prescription_id).annotation
+        url = prescription.image.url+"/-1"
+        res = ''
+        
+        for r in annotation[url]['regions']:
+            res+=" "+r['region_attributes']['text']
+        print(res)
+        result = comprehendmedical.detect_entities(Text= res)
+        entities = result['Entities']
+       
+       
+        PROTECTED_HEALTH_INFORMATION = []
+        Medication = {}
+        med=[]
+        c = []
+        for e in entities:
+            print("entities",e)
+        for key in entities:
+            
+            if key['Category'] == 'PROTECTED_HEALTH_INFORMATION':
+                PROTECTED_HEALTH_INFORMATION.append(key['Text'])
+            elif key['Category'] == 'MEDICATION':
+                med.append(key['Text'])
+                med.append('N.A')
+                med.append('N.A.')
+                
+                dosage = -1
+                frequency = -1
+                for i in key['Attributes']:
+                    if i['Type'] == 'DOSAGE':
+                        dosage = i['Text']
+                        med[1]=i['Text']
+                    elif i['Type'] == 'FREQUENCY':
+                        frequency =  i['Text']
+                        med[2]=i['Text']
+                c.append(med)
+                med=[]
 
+                if key['Text'] not in Medication:
+                    Medication[key['Text']] = [dosage,frequency]
+
+       
+        context={
+            'med':c,
+        }
+        return render(request, 'pages/medication.html',context=context)
+    else:
+        return redirect('login')
 
 def singleView(request, prescription_id):
     if request.user.is_authenticated:
