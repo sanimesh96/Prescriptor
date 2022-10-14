@@ -1,8 +1,9 @@
+import re
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from .models import Prescription
 import json
-
+from .utils import viewAnnotation
 
 import boto3
 from .utils import convert
@@ -41,6 +42,19 @@ def viewPrescription(request):
             'prescriptions' : Prescription.objects.all(),
         }
         return render(request, 'pages/viewPrescription.html', context=context)
+    else:
+        return redirect('login')
+
+def visualizeAnnotation(request, prescription_id):
+    if request.user.is_authenticated:
+        annotation = None
+        prescription = Prescription.objects.get(id=prescription_id)
+        annotation = prescription.annotation
+        context = {
+            'prescription':prescription,
+            'annotated_image': viewAnnotation(annotation)
+        }
+        return render(request, 'pages/visualise.html', context=context)
     else:
         return redirect('login')
 
@@ -108,7 +122,6 @@ def predictPrescription(request, prescription_id):
 
 def addAnnotation(request, prescription_id):
     prescription = Prescription.objects.get(id=prescription_id)
-    print(request.POST)
     annotations = request.POST['annotation']
     annotations = json.loads(annotations)
     prescription.annotation = annotations
